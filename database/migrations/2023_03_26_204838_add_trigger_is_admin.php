@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,11 +14,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('password_resets', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
+        DB::unprepared("CREATE TRIGGER `insert_admin_or_candidat` AFTER INSERT ON `utilisateur` FOR EACH ROW
+BEGIN
+  IF NEW.isAdmin = 1 THEN
+    INSERT INTO admin(idUtilisateur) VALUES (NEW.id);
+  ELSE
+    INSERT INTO candidat(idUtilisateur) VALUES (NEW.id);
+  END IF;
+END;"); 
     }
 
     /**
@@ -27,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('password_resets');
+        DB::unprepared('DROP TRIGGER IF EXISTS `insert_admin_or_candidat`');
     }
 };

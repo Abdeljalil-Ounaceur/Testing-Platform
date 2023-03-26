@@ -58,7 +58,7 @@ const groupExample = {
   candidatsIDs: [1, 2, 3, 6, 7],
   candidatsEnListeDAttente: [4, 5],
   nomGroupe: "monGroupe",
-  testAutorisés: [5, 6],
+  testAutorisés: [1],
 };
 
 const resultExample = {
@@ -144,10 +144,7 @@ const inserting = () => {
 
   return (
     <>
-      <form
-        /*action="http://localhost:8000/api/Inserting"*/ method="get"
-        className="m-4"
-      >
+      <form method="get" className="m-4">
         <table>
           <tbody>
             <tr>
