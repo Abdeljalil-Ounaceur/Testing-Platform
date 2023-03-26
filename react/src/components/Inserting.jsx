@@ -55,8 +55,8 @@ const testExample = {
 
 const groupExample = {
   idAdmin: 1,
-  candidatsIDs: [1, 2, 3, 6, 7],
-  candidatsEnListeDAttente: [4, 5],
+  candidatsIDs: [1],
+  candidatsEnListeDAttente: [],
   nomGroupe: "monGroupe",
   testAutorisés: [1],
 };
