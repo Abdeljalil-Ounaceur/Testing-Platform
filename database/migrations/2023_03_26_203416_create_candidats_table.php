@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('admin', function (Blueprint $table) {
-            $table->integer('idAdmin', true);
-            $table->integer('idUtilisateur')->index('fk_admin_utilisateur');
+        Schema::create('candidats', function (Blueprint $table) {
+            $table->integer('idCandidat', true);
+            $table->integer('idUser')->index('fk_candidat_user');
         });
     }
 
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('admin');
+        Schema::dropIfExists('candidats');
     }
 };

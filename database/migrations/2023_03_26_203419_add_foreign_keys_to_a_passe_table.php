@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('a_passe', function (Blueprint $table) {
-            $table->foreign(['idTest'], 'fk_a_passe_test_0')->references(['idTest'])->on('test')->onUpdate('CASCADE')->onDelete('CASCADE');
-            $table->foreign(['idCandidat'], 'fk_a_passe_candidat')->references(['idCandidat'])->on('candidat')->onUpdate('CASCADE')->onDelete('CASCADE');
+        Schema::table('a_passes', function (Blueprint $table) {
+            $table->foreign(['idTest'], 'fk_a_passe_test_0')->references(['idTest'])->on('tests')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreign(['idCandidat'], 'fk_a_passe_candidat')->references(['idCandidat'])->on('candidats')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('a_passe', function (Blueprint $table) {
+        Schema::table('a_passes', function (Blueprint $table) {
             $table->dropForeign('fk_a_passe_test_0');
             $table->dropForeign('fk_a_passe_candidat');
         });

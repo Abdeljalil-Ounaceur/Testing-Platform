@@ -13,10 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('groupe', function (Blueprint $table) {
-            $table->integer('idGroupe', true);
-            $table->integer('idAdmin')->index('fk_groupe_admin');
-            $table->string('nomGroupe', 40)->nullable();
+        Schema::create('tests', function (Blueprint $table) {
+            $table->integer('idTest', true);
+            $table->unsignedBigInteger('user_id');
+            $table->integer('idAdmin')->index('fk_test_admin');
+            $table->string('titre', 40);
+            $table->integer('duree_mins');
+            $table->string('description', 500)->nullable();
         });
     }
 
@@ -27,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('groupe');
+        Schema::dropIfExists('tests');
     }
 };

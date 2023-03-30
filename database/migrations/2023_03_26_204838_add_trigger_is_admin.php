@@ -7,30 +7,30 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
-    {
-        DB::unprepared("CREATE TRIGGER `insert_admin_or_candidat` AFTER INSERT ON `utilisateur` FOR EACH ROW
+  /**
+   * Run the migrations.
+   *
+   * @return void
+   */
+  public function up()
+  {
+    DB::unprepared("CREATE TRIGGER `insert_admin_or_candidat` AFTER INSERT ON `users` FOR EACH ROW
 BEGIN
   IF NEW.isAdmin = 1 THEN
-    INSERT INTO admin(idUtilisateur) VALUES (NEW.id);
+    INSERT INTO admins(idUser) VALUES (NEW.id);
   ELSE
-    INSERT INTO candidat(idUtilisateur) VALUES (NEW.id);
+    INSERT INTO candidats(idUser) VALUES (NEW.id);
   END IF;
-END;"); 
-    }
+END;");
+  }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        DB::unprepared('DROP TRIGGER IF EXISTS `insert_admin_or_candidat`');
-    }
+  /**
+   * Reverse the migrations.
+   *
+   * @return void
+   */
+  public function down()
+  {
+    DB::unprepared('DROP TRIGGER IF EXISTS `insert_admin_or_candidat`');
+  }
 };

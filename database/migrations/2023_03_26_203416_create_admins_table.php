@@ -13,12 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('test', function (Blueprint $table) {
-            $table->integer('idTest', true);
-            $table->integer('idAdmin')->index('fk_test_admin');
-            $table->string('titre', 40);
-            $table->integer('duree_mins');
-            $table->string('description', 500)->nullable();
+        Schema::create('admins', function (Blueprint $table) {
+            $table->integer('idAdmin', true);
+            $table->integer('idUser')->index('fk_admin_user');
         });
     }
 
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('test');
+        Schema::dropIfExists('admins');
     }
 };

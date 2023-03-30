@@ -3,6 +3,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,24 +17,40 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+  return $request->user();
 });
 
 
+
+//Authenticating routes
+
+//public routes
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+
+//protected routes
+Route::group(['middleware' => ['auth:sanctum']], function () {              //we can protect our routes using this thing
+  Route::post('/logout', [AuthController::class, 'logout']);
+});
+
+// Route::resource('/tests', [TestController::class, 'index']); this one is for the tests, we will work on it later
+
+
+// Path: routes\api.php
 Route::post('/Inserting/User', function (Request $request) {
   //READ COMMENTS OF THIS FUNCTION CAREFULLY
   //parsing data to json
   $jsonData = $request->json()->all();
-  try{
+  try {
     //connecting to the database
-    $conn = new mysqli("localhost:3306","root","","pfeDB");
+    $conn = new mysqli("localhost:3306", "root", "", "pfeDB");
     //transaction == checkpoint or savepoint 
     $conn->query("start transaction");
     // 1 - preparing a statement == setting the place  for some variables
     //the `null` is for the auto_increment field (you can ask me for some details)
     $statement = $conn->prepare("insert into UTILISATEUR values(null,?,?,?,?,?)");
     //2 - binding each variable with a `?`
-    $statement->bind_param("ssssi",$fname,$lname,$email,$gsm,$isAdmin);
+    $statement->bind_param("ssssi", $fname, $lname, $email, $gsm, $isAdmin);
 
     //retrieving some data from the JSON file
     $fname = $jsonData['fname'];
@@ -46,43 +63,42 @@ Route::post('/Inserting/User', function (Request $request) {
     //3 - finally executing the statement
     $success = $statement->execute();
 
-    if(!$success){
+    if (!$success) {
       //query failure == rollback and return error message
       $conn->rollback();
-      return response()->json(['type'=>'danger','message' => "couldn't insert to user"], 200);
+      return response()->json(['type' => 'danger', 'message' => "couldn't insert to user"], 200);
     }
 
     //if everything is ok then
     $conn->commit();
     $conn->close();
-    return response()->json(['type'=>'success','message' => "User $fname $lname inserted successfully."], 200);
-
-  }catch(Exception $error){
+    return response()->json(['type' => 'success', 'message' => "User $fname $lname inserted successfully."], 200);
+  } catch (Exception $error) {
     //catch all possible exeptions (except syntax errors)
     $errorMessage = $error->getMessage();
-    return response()->json(['type'=>'danger','message' => "there was an error in the database : $errorMessage"], 200);
+    return response()->json(['type' => 'danger', 'message' => "there was an error in the database : $errorMessage"], 200);
   }
 });
 
 Route::post('/Inserting/Test', function (Request $request) {
   $jsonData = $request->json()->all();
-  
-  try{
+
+  try {
     //same thing...
-    $conn = new mysqli("localhost:3306","root","","pfeDB");
+    $conn = new mysqli("localhost:3306", "root", "", "pfeDB");
     $conn->query("start transaction");
     $statement = $conn->prepare("insert into Test values(null,?,?,?,?)");
-    $statement->bind_param("isis",$idAdmin,$titre,$duree_mins,$description);
+    $statement->bind_param("isis", $idAdmin, $titre, $duree_mins, $description);
 
     $idAdmin = $jsonData['idAdmin'];
     $titre = $jsonData['titre'];
     $duree_mins = $jsonData['duree_mins'];
     $description = $jsonData['description'];
-    
+
     $successTest = $statement->execute();
-    if(!$successTest){
+    if (!$successTest) {
       $conn->rollback();
-      return response()->json(['type'=>'danger','message' => "couldn't insert to test"], 200);
+      return response()->json(['type' => 'danger', 'message' => "couldn't insert to test"], 200);
     }
 
 
@@ -95,22 +111,22 @@ Route::post('/Inserting/Test', function (Request $request) {
     foreach ($questions as $question) {
       //preparing to insert a question in QUESTION table
       $statement = $conn->prepare("insert into question values(null,?,?,?)");
-      $statement->bind_param("iis",$lastTestID,$numQuestion,$titre);
+      $statement->bind_param("iis", $lastTestID, $numQuestion, $titre);
 
       //question number
       $numQuestion = ++$i;
       $titre = $question['titre'];
-      
+
       //actually inserting the question
       $successQuestion = $statement->execute();
 
 
-      if(!$successQuestion){
+      if (!$successQuestion) {
         //fail  == rollback
         $conn->rollback();
-        return response()->json(['type'=>'danger','message' => "couldn't insert to question"], 200);
+        return response()->json(['type' => 'danger', 'message' => "couldn't insert to question"], 200);
       }
-      
+
       //success == continue to question's answers
 
       //the id of the last inserted question
@@ -122,63 +138,61 @@ Route::post('/Inserting/Test', function (Request $request) {
       foreach ($reponses as $reponse) {
         //same for questions
         $statement = $conn->prepare("insert into reponse values(null,?,?,?,?)");
-        $statement->bind_param("iiis",$lastQuestionID,$numReponse,$estCorrecte,$text);
-        
+        $statement->bind_param("iiis", $lastQuestionID, $numReponse, $estCorrecte, $text);
+
         $numReponse = ++$j;
-        $estCorrecte = $reponse['estCorrecte'] ? 1: 0;
+        $estCorrecte = $reponse['estCorrecte'] ? 1 : 0;
         $text = $reponse["text"];
-        
+
         $successReponce = $statement->execute();
 
-        if(!$successReponce){
+        if (!$successReponce) {
           $conn->rollback();
-          return response()->json(['type'=>'danger','message' => "couldn't insert to reponce"], 200);
+          return response()->json(['type' => 'danger', 'message' => "couldn't insert to reponce"], 200);
         }
       }
-      
     }
 
     //successfully inserted the TEST, its QUESTIONS and their ANSWERS
     $conn->commit();
-    return response()->json(['type'=>'success','message' => "Test was inserted successfully"], 200);
-
-  }catch(Exception $error){
+    return response()->json(['type' => 'success', 'message' => "Test was inserted successfully"], 200);
+  } catch (Exception $error) {
     $errorMessage = $error->getMessage();
-    return response()->json(['type'=>'danger','message' => "there was an error in the database : $errorMessage"], 200);
+    return response()->json(['type' => 'danger', 'message' => "there was an error in the database : $errorMessage"], 200);
   }
 });
 
 Route::post('/Inserting/Group', function (Request $request) {
   $jsonData = $request->json()->all();
-  try{
+  try {
     //i hope there is a way to avoid connecting each time to the database
-    $conn = new mysqli("localhost:3306","root","","pfeDB");
+    $conn = new mysqli("localhost:3306", "root", "", "pfeDB");
     $conn->query("start transaction");
-    
+
     $idAdmin = $jsonData['idAdmin'];
     $nomGroupe = $jsonData['nomGroupe'];
 
     //another way to insert data to a table (the simpler --less elegant-- way)
     $successGroup = $conn->query("insert into Groupe values(null,$idAdmin,'$nomGroupe')");
 
-    if(!$successGroup){
+    if (!$successGroup) {
       $conn->rollback();
-      return response()->json(['type'=>'danger','message' => "couldn't insert to groupe"], 200);
+      return response()->json(['type' => 'danger', 'message' => "couldn't insert to groupe"], 200);
     }
 
     //you gotta remember this command (it is exceptionally helpful)
     $idGroup = $conn->insert_id;
 
-    
+
     $candidatsIDs  = $jsonData['candidatsIDs'];
 
     //inserting candidats as actual group members (notice the last argument is 0 : en_attente=0)
     foreach ($candidatsIDs as $idCandidat) {
       $succsessMembreGroup = $conn->query("insert into membre_de_groupe values($idCandidat,$idGroup,0)");
-      
-      if(!$succsessMembreGroup){
+
+      if (!$succsessMembreGroup) {
         $conn->rollback();
-        return response()->json(['type'=>'danger','message' => "couldn't insert to membre_de_groupe"], 200);
+        return response()->json(['type' => 'danger', 'message' => "couldn't insert to membre_de_groupe"], 200);
       }
     }
 
@@ -186,10 +200,10 @@ Route::post('/Inserting/Group', function (Request $request) {
     $candidatsEnListeDAttente  = $jsonData['candidatsEnListeDAttente'];
     foreach ($candidatsEnListeDAttente as $idCandidat) {
       $succsessListeDAttente = $conn->query("insert into membre_de_groupe values($idCandidat,$idGroup,1)");
-      
-      if(!$succsessListeDAttente){
+
+      if (!$succsessListeDAttente) {
         $conn->rollback();
-        return response()->json(['type'=>'danger','message' => "couldn't insert to membre_de_groupe (2)"], 200);
+        return response()->json(['type' => 'danger', 'message' => "couldn't insert to membre_de_groupe (2)"], 200);
       }
     }
 
@@ -198,42 +212,41 @@ Route::post('/Inserting/Group', function (Request $request) {
     $testAutorises  = $jsonData['testAutorisés'];
     foreach ($testAutorises as $idTest) {
       $succsessTestGroup = $conn->query("insert into grps_autorises values($idGroup,$idTest)");
-      
-      if(!$succsessTestGroup){
+
+      if (!$succsessTestGroup) {
         $conn->rollback();
-        return response()->json(['type'=>'danger','message' => "couldn't insert to grps_autorises"], 200);
+        return response()->json(['type' => 'danger', 'message' => "couldn't insert to grps_autorises"], 200);
       }
     }
-    
+
 
     //everything was done flawlessly
     $conn->commit();
-    return response()->json(['type'=>'success','message' => "Group was inserted successfully"], 200);
-
-  }catch(Exception $error){
+    return response()->json(['type' => 'success', 'message' => "Group was inserted successfully"], 200);
+  } catch (Exception $error) {
     $errorMessage = $error->getMessage();
-    return response()->json(['type'=>'danger','message' => "there was an error in the database : $errorMessage"], 200);
+    return response()->json(['type' => 'danger', 'message' => "there was an error in the database : $errorMessage"], 200);
   }
 });
 
 Route::post('/Inserting/Result', function (Request $request) {
   $jsonData = $request->json()->all();
-  try{
+  try {
     //the pattern is now more familiar
-    $conn = new mysqli("localhost:3306","root","","pfeDB");
+    $conn = new mysqli("localhost:3306", "root", "", "pfeDB");
     $conn->query("start transaction");
-    
+
     $idCandidat = $jsonData['idCandidat'];
     $idTest = $jsonData['idTest'];
     $score = $jsonData['score'];
     $duree = $jsonData['duree'];
-    
+
     $successResult = $conn->query("insert into Resultat values(null,$idCandidat,$idTest,$score,$duree)");
-    if(!$successResult){
+    if (!$successResult) {
       $conn->rollback();
-      return response()->json(['type'=>'danger','message' => "couldn't insert to resultat"], 200);
+      return response()->json(['type' => 'danger', 'message' => "couldn't insert to resultat"], 200);
     }
-    
+
 
     //!!! ATTENTION !!!
     //The insertion of result_responses requires some logic
@@ -242,9 +255,9 @@ Route::post('/Inserting/Result', function (Request $request) {
 
     //FIRST OFF: we need the list of questions  of this result's test
     $questionList = $conn->query("select * from question where idTest = $idTest order by numQuestion asc");
-    if($questionList === false){
+    if ($questionList === false) {
       $conn->rollback();
-      return response()->json(['type'=>'danger','message' => "couldn't get questions"], 200);
+      return response()->json(['type' => 'danger', 'message' => "couldn't get questions"], 200);
     }
 
     //`responses` is the ARRAY OF ARRAYS of selected answers
@@ -255,36 +268,35 @@ Route::post('/Inserting/Result', function (Request $request) {
       $questionRow = mysqli_fetch_assoc($questionList);
 
       //Constructing a #,#,# like list of answer numbers (to use it inside the sql query)
-      $numReponsesStr = implode(",",$numReponses);
+      $numReponsesStr = implode(",", $numReponses);
 
       $idQuestion = $questionRow['idQuestion'];
 
       //WE ALSO NEED the `user selected` responseList of the current question
       $reponseList = $conn->query("select * from reponse where idQuestion = $idQuestion and numReponse in ($numReponsesStr) order by numReponse asc");
-      
-      if($reponseList === false){
-        return response()->json(['type'=>'danger','message' => "couldn't get responses"], 200);
+
+      if ($reponseList === false) {
+        return response()->json(['type' => 'danger', 'message' => "couldn't get responses"], 200);
       }
 
       //looping over the users's responseList and inserting it to the reponse_resultat table
-      while($reponseRow = mysqli_fetch_assoc($reponseList)){
-            $conn->query("insert into reponse_resultat values($idResult,".$reponseRow['idReponse'].")");
+      while ($reponseRow = mysqli_fetch_assoc($reponseList)) {
+        $conn->query("insert into reponse_resultat values($idResult," . $reponseRow['idReponse'] . ")");
       }
-    }    
+    }
 
     //FINALLY : inserting the candidat, test, and result Ids inside a_passe (for history) 
     $success = $conn->query("insert into a_passe values($idCandidat,$idTest,$idResult)");
-    if(!$success){
+    if (!$success) {
       $conn->rollback();
-      return response()->json(['type'=>'danger','message' => "couldn't insert to a_passe"], 200);
+      return response()->json(['type' => 'danger', 'message' => "couldn't insert to a_passe"], 200);
     }
-    
+
 
     $conn->commit();
-    return response()->json(['type'=>'success','message' => "Result was inserted successfully"], 200);
-
-  }catch(Exception $error){
+    return response()->json(['type' => 'success', 'message' => "Result was inserted successfully"], 200);
+  } catch (Exception $error) {
     $errorMessage = $error->getMessage();
-    return response()->json(['type'=>'danger','message' => "there was an error in the database : $errorMessage"], 200);
+    return response()->json(['type' => 'danger', 'message' => "there was an error in the database : $errorMessage"], 200);
   }
 });

@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('reponse_resultat', function (Blueprint $table) {
-            $table->foreign(['idResultat'], 'fk_reponce_resultat_resultat')->references(['idResultat'])->on('resultat')->onUpdate('CASCADE')->onDelete('CASCADE');
-            $table->foreign(['idReponce'], 'fk_reponce_resultat_reponse_0')->references(['idreponse'])->on('reponse')->onUpdate('CASCADE')->onDelete('CASCADE');
+        Schema::table('reponse_resultats', function (Blueprint $table) {
+            $table->foreign(['idResultat'], 'fk_reponce_resultat_resultat')->references(['idResultat'])->on('resultats')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreign(['idReponce'], 'fk_reponce_resultat_reponse_0')->references(['idreponse'])->on('reponses')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('reponse_resultat', function (Blueprint $table) {
+        Schema::table('reponse_resultats', function (Blueprint $table) {
             $table->dropForeign('fk_reponce_resultat_resultat');
             $table->dropForeign('fk_reponce_resultat_reponse_0');
         });

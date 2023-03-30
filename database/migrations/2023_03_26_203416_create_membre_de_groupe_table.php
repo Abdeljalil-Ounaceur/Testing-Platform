@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('membre_de_groupe', function (Blueprint $table) {
+        Schema::create('membre_de_groupes', function (Blueprint $table) {
             $table->integer('idCandidat');
             $table->integer('idGroupe')->index('fk_membre_de_groupe_groupe_0');
             $table->boolean('en_attente')->default(true);
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('membre_de_groupe');
+        Schema::dropIfExists('membre_de_groupes');
     }
 };

@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('grps_autorises', function (Blueprint $table) {
-            $table->foreign(['idTest'], 'fk_grps_autorises_test')->references(['idTest'])->on('test')->onUpdate('CASCADE')->onDelete('CASCADE');
-            $table->foreign(['idGroupe'], 'fk_grps_autorises_groupe')->references(['idGroupe'])->on('groupe')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreign(['idTest'], 'fk_grps_autorises_test')->references(['idTest'])->on('tests')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreign(['idGroupe'], 'fk_grps_autorises_groupe')->references(['idGroupe'])->on('groupes')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
     }
 

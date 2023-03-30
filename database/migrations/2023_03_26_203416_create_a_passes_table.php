@@ -13,9 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('candidat', function (Blueprint $table) {
-            $table->integer('idCandidat', true);
-            $table->integer('idUtilisateur')->index('fk_candidat_utilisateur');
+        Schema::create('a_passes', function (Blueprint $table) {
+            $table->integer('idCandidat');
+            $table->integer('idTest')->index('fk_a_passe_test_0');
+            $table->integer('idResultat')->index('fk_a_passe_resultat');
+
+            $table->primary(['idCandidat', 'idTest', 'idResultat']);
         });
     }
 
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('candidat');
+        Schema::dropIfExists('a_passes');
     }
 };
